@@ -4,16 +4,20 @@ from datetime import datetime, timedelta
 from io import StringIO
 import requests
 
-# === Fetch 6 months of CDC variant data ===
-file_url = "https://data.cdc.gov/resource/jr58-6ysp.csv"
-six_months_ago = (datetime.now() - timedelta(weeks=26)).strftime('%Y-%m-%d')
+# === CONFIG ===
+API_URL = "https://data.cdc.gov/resource/jr58-6ysp.json"
+SIX_MONTHS_AGO = (datetime.now() - timedelta(weeks=26)).strftime('%Y-%m-%d')
+LIMIT = 1000
 
+# === Fetch Data ===
 params = {
-    "$limit": 1000,
-    "$where": f"week_ending >= '{six_months_ago}' AND usa_or_hhsregion = 'USA'"
+    "$limit": LIMIT,
+    "$where": f"week_ending >= '{SIX_MONTHS_AGO}' AND usa_or_hhsregion = 'USA'"
 }
-resp = requests.get(file_url, params=params)
-df = pd.read_csv(StringIO(resp.text))
+resp = requests.get(API_URL, params=params)
+data = resp.json() # Fetch data from CDC API, parses JSON into Python dicts/lists
+
+df = pd.DataFrame(data)
 
 # === Preprocess ===
 df['week_ending'] = pd.to_datetime(df['week_ending'])
