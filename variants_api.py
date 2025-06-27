@@ -27,6 +27,7 @@ df = df[df['share'] >= 0.01]
 # Pivot and normalize by row
 pivot_df = df.pivot_table(index='week_ending', columns='variant', values='share', aggfunc='sum').fillna(0)
 pivot_df = pivot_df.div(pivot_df.sum(axis=1), axis=0)
+latest_date = pivot_df.index.max().strftime('%Y-%m-%d')
 
 # Keep only variants that ever exceeded 1% overall
 variant_totals = pivot_df.sum()
@@ -69,7 +70,7 @@ for variant in pivot_df.columns[1:]:  # Skip 'week_ending'
     bottom += values
 
 # === Axis setup ===
-ax.set_title("SARS-CoV-2 Variant Proportions (Last 6 Months, ≥1% Share)", fontsize=16)
+ax.set_title(f"SARS-CoV-2 Variant Proportions (Last 6 Months, ≥1% Share)\nMost recent data: {latest_date}", fontsize=16)
 ax.set_xlabel("Week Ending", fontsize=12)
 ax.set_ylabel("Proportion (%)", fontsize=12)
 ax.set_xticks(list(bar_positions)[::2])
